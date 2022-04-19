@@ -1,0 +1,24 @@
+{
+  "name": "api-reviews",
+  "version": "1.0.0",
+  "description": "Review API",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SDCHotPot/API-Reviews.git"
+  },
+  "author": "RphPandan",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/SDCHotPot/API-Reviews/issues"
+  },
+  "homepage": "https://github.com/SDCHotPot/API-Reviews#readme",
+  "dependencies": {
+    "axios": "^0.26.1",
+    "express": "^4.17.3",
+    "nodemon": "^2.0.15"
+  }
+}
