@@ -1,112 +1,74 @@
 require('dotenv').config();
 
 const { Client } = require('pg');
-const Sequelize = require('sequelize');
+// const Sequelize = require('sequelize');
+const postgresDb = require('./postgresConnection');
+const Reviews = require('./Schemas/Reviews');
+const Products = require('./Schemas/Products');
+const Photos = require('./Schemas/Photos');
+const Characteristics = require('./Schemas/Characteristics');
+const ReviewCharacteristics = require('./Schemas/ReviewCharacteristics');
 
 const client = new Client({
   user: `${process.env.USER}`,
   password: `${process.env.PASSWORD}`,
   host: `${process.env.HOST}`,
-  database: 'postgres',
+  // database: 'reviewssdc',
 });
-
 client.connect()
   .then(() => {
-    console.log('im connected');
+    // console.log('im connected');
   })
-  .catch((err) => {
-    console.log(err);
+  .catch(() => {
+    // console.log(err);
   });
-client.query('SELECT FROM pg_database WHERE datname = $1', ['reviewssdc'])
+client.query('SELECT FROM pg_database WHERE datname = $1', [`${process.env.PASSWORD}`])
   .then((result) => {
     if (result.rowCount === 0) {
-      client.query('CREATE DATABASE reviewssdc')
-        .then((result) => {
-          console.log('new database created');
+      client.query(`CREATE DATABASE ${process.env.PASSWORD}`)
+        .then(() => {
+          // console.log('new database created');
         })
         .catch(() => {
-          console.log('something went wrong with creating table');
+          // console.log('something went wrong with creating table');
         });
-    } else {
-      if (result.rowCount === 1) {
-        console.log('this table exists already')
-      }
+    }
+    if (result.rowCount === 1) {
+      // console.log('reviewssdc database exists already');
     }
   })
-  .catch((err) => {
-    console.log(err);
+  .catch(() => {
+    // console.log(err);
+  })
+  .then(() => {
+    client.end()
+      .then(() => {
+        // console.log('disconnected from postgres');
+      });
   })
   .finally(() => {
-    const sequelize = new Sequelize('reviewssdc', `${process.env.USER}`, `${process.env.PASSWORD}`, {
-      host: `${process.env.HOST}`,
-      dialect: 'postgres',
-    }, () => {
-      console.log(process.env.PASSWORD);
-    });
-    sequelize.authenticate()
+    postgresDb.authenticate()
       .then(() => {
-        console.log('connected to postgres');
+        // console.log('connected to postgres 2nd time');
       })
-      .catch((err) => {
-        console.log(err);
+      .catch(() => {
+        // console.log(err);
+      })
+      .then(() => {
+        Products.sync({}).then(() => {
+          // console.log('products synced');
+          Reviews.sync({}).then(() => {
+            // console.log('reviews synced');
+            Photos.sync({}).then(() => {
+              // console.log('photos synced');
+            });
+          });
+          Characteristics.sync({}).then(() => {
+            // console.log('characteristics synced');
+            ReviewCharacteristics.sync({}).then(() => {
+              // console.log('reviewcharacterisitcs synced');
+            });
+          });
+        });
       });
-    const Reviews = sequelize.define('review', {
-      review_id: {
-        type: Sequelize.INTEGER,
-        primaryKey: true,
-        unique: true,
-      },
-      rating: {
-        type: Sequelize.INTEGER,
-        allowNull: false,
-      },
-      summary: {
-        type: Sequelize.STRING,
-        allowNull: false,
-      },
-      recommended: {
-        type: Sequelize.BOOLEAN,
-        allowNull: false,
-      },
-      body: {
-        type: Sequelize.STRING,
-        allowNull: false,
-      },
-      response: {
-        type: Sequelize.STRING,
-        allowNull: true,
-      },
-      date: {
-        type: Sequelize.DATE,
-        defaultValue: Sequelize.NOW,
-      },
-      reviewer_name: {
-        type: Sequelize.STRING,
-        allowNull: false,
-      },
-      helpfulness: {
-        type: Sequelize.INTEGER,
-      },
-    });
-    const Photos = sequelize.define('photo', {
-      id: {
-        type: Sequelize.NUMBER,
-        autoIncrement: true,
-        primaryKey: true,
-        unique: true,
-      },
-      photo: {
-        type: Sequelize.STRING,
-        allowNull: false,
-      },
-      review_id: {
-        type: Sequelize.INTEGER,
-        references: {
-          model: 'Reviews',
-          key: 'review_id',
-          deferrable: Sequelize.Deferrable.INITIALLY_IMMEDIATE,
-        },
-      },
-    });
-    module.exports = { Photos, Reviews };
   });

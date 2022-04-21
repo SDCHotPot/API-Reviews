@@ -1,18 +1,18 @@
 const Sequelize = require('sequelize');
 const postgresDb = require('../postgresConnection');
-const Reviews = require('./Reviews');
+const Products = require('./Products');
 
-const Photos = postgresDb.define('photo', {
+const Characteristics = postgresDb.define('characteristic', {
+
   id: {
     type: Sequelize.INTEGER,
     primaryKey: true,
     unique: true,
   },
-  photo: {
+  name: {
     type: Sequelize.STRING,
   },
 });
 
-Photos.belongsTo(Reviews);
-
-module.exports = Photos;
+Characteristics.belongsTo(Products);
+module.exports = Characteristics;

@@ -2,31 +2,60 @@ const mongoose = require('mongoose');
 
 mongoose.connect('mongodb://localhost/FECReviewAPI')
   .then(() => {
-    console.log('im connected to mongo');
+    // console.log('im connected to mongo');
   })
-  .catch((err) => {
-    console.log(err);
+  .catch(() => {
+    // console.log(err);
   });
 
-const ReviewPhotos = mongoose.model('ReviewPhoto', new mongoose.Schema({
-  photos: {
-    type: String,
+const Products = mongoose.model('Product', new mongoose.Schema({
+  id: {
+    type: Number,
+    required: true,
+    primaryKey: true,
   },
-  review: {
-    type: mongoose.Schema.ObjectId,
-    ref: 'Reviews',
+  name: {
+    type: String,
+    required: true,
+  },
+  slogan: {
+    type: String,
+    required: true,
+  },
+  description: {
+    type: String,
+    required: true,
+  },
+  category: {
+    type: String,
+    required: true,
+  },
+  default_price: {
+    type: Number,
+    required: true,
   },
 }));
 
 const Reviews = mongoose.model('Review', new mongoose.Schema({
-  review_id: {
+  id: {
     type: Number,
+    required: true,
+    primaryKey: true,
   },
+  product_id: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Products' }],
   rating: {
     type: Number,
     required: true,
   },
+  date: {
+    type: Date,
+    default: Date.now,
+  },
   summary: {
+    type: String,
+    required: true,
+  },
+  body: {
     type: String,
     required: true,
   },
@@ -34,23 +63,66 @@ const Reviews = mongoose.model('Review', new mongoose.Schema({
     type: Boolean,
     required: true,
   },
-  body: {
-    type: String,
-    required: true,
-  },
-  response: String,
-  date: {
-    type: Date,
-    required: true,
+  reported: {
+    type: Boolean,
   },
   reviewer_name: {
     type: String,
-    required: true,
+  },
+  reviewer_email: {
+    type: String,
+  },
+  response: {
+    type: String,
   },
   helpfulness: {
-    type: Boolean,
+    type: Number,
+  },
+}));
+
+const Photos = mongoose.model('Photo', new mongoose.Schema({
+  id: {
+    type: Number,
+    required: true,
+    primaryKey: true,
+  },
+  review: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Reviews' }],
+  url: {
+    type: String,
+  },
+}));
+
+const Characteristics = mongoose.model('Characteristic', new mongoose.Schema({
+  id: {
+    type: Number,
+    required: true,
+    primaryKey: true,
+  },
+  product_id: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Products' }],
+  name: {
+    type: String,
     required: true,
   },
 }));
 
-module.exports = { Reviews, ReviewPhotos };
+const CharacteristicsReview = mongoose.model('Characteristic_Reviews', new mongoose.Schema({
+  id: {
+    type: Number,
+    required: true,
+    primaryKey: true,
+  },
+  characteristic_id: {
+    type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Characteristics' }],
+  },
+  review_id: {
+    type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Reviews' }],
+  },
+  value: {
+    type: Number,
+    required: true,
+  },
+}));
+
+module.exports = {
+  Products, Reviews, Photos, Characteristics, CharacteristicsReview,
+};
