@@ -2,12 +2,11 @@ const express = require('express');
 require('../dbms/mongo/mongoose');
 require('../dbms/postgres/postgres');
 
-const app = express();
-const port = 3000;
+const router = require('./router');
 
-app.get('/', (req, res) => {
-  res.send('Hello World!');
-});
+const app = express();
+app.use(router);
+const port = 3000;
 
 app.listen(port, () => {
   // console.log(`listening on port ${port}`);

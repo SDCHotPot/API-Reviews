@@ -8,11 +8,18 @@ const Photos = postgresDb.define('photo', {
     primaryKey: true,
     unique: true,
   },
+  review_id: {
+    type: Sequelize.INTEGER,
+    references: {
+      model: Reviews,
+      key: 'review_id',
+    },
+  },
   photo: {
     type: Sequelize.STRING,
   },
-});
+}, { timestamps: false, indexes: [{ fields: ['review_id'] }] });
 
-Photos.belongsTo(Reviews);
+// Photos.belongsTo(Reviews, { foreignKey: 'review_id' });
 
 module.exports = Photos;
