@@ -18,6 +18,8 @@ const reviews = {
           break;
         case 'helpful': orderBy = 'ORDER BY r.helpfulness DESC';
           break;
+        case 'relevant': orderBy = 'ORDER BY r.helpfulness DESC, r.date DESC';
+          break;
         default: orderBy = null;
       }
       const dbReviews = {
