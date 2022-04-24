@@ -6,7 +6,8 @@
   "scripts": {
     "server": "nodemon server/index.js",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "seed": "psql postgres -U rphpandan < dbms/csv/seed.sql"
+    "seed": "psql postgres -U rphpandan < dbms/postgres/seed.sql",
+    "testDb": "psql postgres -U rphpandan < dbms/postgres/testTables.sql"
   },
   "repository": {
     "type": "git",

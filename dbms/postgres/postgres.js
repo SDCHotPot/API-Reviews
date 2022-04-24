@@ -17,7 +17,7 @@ const client = new Client({
 });
 client.connect()
   .then(() => {
-    console.log('im connected');
+    console.log(`im connected to ${client.database}`);
   })
   .catch((err) => {
     console.log(err);
