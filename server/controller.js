@@ -89,22 +89,6 @@ const reviews = {
       .catch((err) => res.send(err));
   },
   post: (req, res) => {
-    req.body = {
-      product_id: 1,
-      rating: 4,
-      summary: 'this is test summary',
-      body: 'this is test body',
-      recommend: true,
-      name: 'testName',
-      email: 'test@email.com',
-      photos: ['p1', 'p2', 'p3'],
-      characteristics: {
-        1: 5,
-        2: 4,
-        3: 3,
-        4: 2,
-      },
-    };
     const {
       product_id, rating, summary, body,
       recommend, name, email, photos, characteristics,
@@ -112,42 +96,46 @@ const reviews = {
     (async () => {
       try {
         await client.query('BEGIN');
-        const reviewInsertText = 'INSERT INTO reviews (product_id, rating, summary, body, recommended, reviewer_name, reviewer_email, response, helpfulness) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id;';
+        const reviewInsertText = 'INSERT INTO reviews (product_id, rating, summary, body, recommended, reviewer_name, reviewer_email) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id;';
         const reviewInsertValues = [product_id, rating, summary, body, recommend, name, email];
         const reviewResponse = await client.query(reviewInsertText, reviewInsertValues);
 
         let photoInsertText = 'INSERT INTO photos(review_id, url) VALUES ';
         const photoInsertValue = [];
         photos.forEach((photo, index) => {
-          if (index === photos.length - 1) {
+          if (index !== photos.length - 1) {
             photoInsertText += ` ($${(index * 2) + 1}, $${(index * 2) + 2}),`;
           } else {
-            photoInsertText += ` ($${(index * 2) + 1}, $${(index * 2 + 1)});`;
+            photoInsertText += ` ($${(index * 2) + 1}, $${((index * 2) + 2)});`;
           }
           photoInsertValue.push(reviewResponse.rows[0].id, photos[index]);
         });
+        // console.log(photoInsertText, photoInsertValue);
 
-        await client.query(photoInsertText, photoInsertValue);
+        // const photosResponse = await client.query(photoInsertText, photoInsertValue);
+        // console.log(photosResponse);
 
         let characteristicReviewsInsertText = 'INSERT INTO characteristic_reviews (characteristic_id, review_id, value) VALUES';
         const characteristicReviewsInsertValue = [];
 
         Object.keys(characteristics).forEach((charId, index, chars) => {
-          if (index === chars.length - 1) {
+          if (index !== chars.length - 1) {
             characteristicReviewsInsertText += ` ($${(index * 3) + 1}, $${(index * 3) + 2}, $${(index * 3) + 3}),`;
           } else {
             characteristicReviewsInsertText += ` ($${(index * 3) + 1}, $${(index * 3) + 2}, $${(index * 3) + 3});`;
           }
-          characteristicReviewsInsertValue.push(charId, reviewResponse.rows[0].id, chars[charId]);
+          // console.log(charId, reviewResponse.rows[0].id, characteristics[charId]);
+          characteristicReviewsInsertValue.push(charId, reviewResponse.rows[0].id, characteristics[charId]);
         });
+        // console.log(characteristicReviewsInsertText, characteristicReviewsInsertValue);
+        const characteristicReviewResponse = (
+          await client.query(characteristicReviewsInsertText, characteristicReviewsInsertValue)
+        );
 
-        await client.query(characteristicReviewsInsertText, characteristicReviewsInsertValue);
         await client.query('COMMIT');
         res.send('im finally back');
       } catch (e) {
         await client.query('ROLLBACK');
-      } finally {
-        client.release();
       }
     })().catch((e) => console.error(e.stack));
   },
