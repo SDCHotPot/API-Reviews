@@ -8,7 +8,7 @@
     "test": "jest",
     "seed": "psql postgres -U rphpandan < dbms/postgres/seed.sql",
     "testDb": "psql postgres -U rphpandan < dbms/postgres/testTables.sql",
-    "k6Load": "k6 run k6Load/script.js"
+    "k6Load": "k6 run test/k6Load/script.js"
   },
   "repository": {
     "type": "git",

@@ -27,10 +27,13 @@ const reviews = {
       const dbReviews = {
         product: Number(product_id), page, count, sort,
       };
-      const queryString = `SELECT r.*, COALESCE(json_agg(
-                          json_build_object(
-                              'id', p.id,
-                              'url', p.url)) FILTER (WHERE p.id IS NOT NULL), '[]') AS photos
+      const queryString = `SELECT r.id as review_id, r.rating,
+                                  r.summary, r.recommended as recommend,
+                                  r.response, r.body, r.date,
+                                  r.reviewer_name, r.helpfulness, r.reported as reported, COALESCE(json_agg(
+                                  json_build_object(
+                                    'id', p.id,
+                                    'url', p.url)) FILTER (WHERE p.id IS NOT NULL), '[]') AS photos
                           FROM reviews r LEFT OUTER JOIN photos p ON p.review_id = r.id
                           WHERE r.product_id = ${product_id} AND r.reported = NOT 't' GROUP BY r.id
                           ${orderBy}
@@ -46,14 +49,12 @@ const reviews = {
         });
     }
   },
-
   meta: (req, res) => {
     const { product_id } = req.query;
     if (!product_id) {
       res.status(500).send('no product id');
     } else {
       const reviewMetaQueryString1 = `SELECT json_build_object(
-                                     'review_total', COUNT(*),
                                      'recommended', json_build_object(
                                                     'true', COUNT(*) FILTER (WHERE r.recommended = 't'),
                                                     'false', COUNT(*) FILTER (WHERE r.recommended = 'f')),
@@ -69,7 +70,7 @@ const reviews = {
       const reviewMetaQueryString2 = `with characteristics_meta as(
                                         select json_build_object(
                                           'id', c.id,
-                                          'avgvalue', avg(cr.value)) as meta,
+                                          'value', avg(cr.value)) as meta,
                                           c.name as name from characteristic_reviews cr
                                           inner join reviews r on r.id = cr.review_id
                                           inner join characteristics c on c.id = cr.characteristic_id
@@ -94,7 +95,7 @@ const reviews = {
           )
             .then((results) => {
               Object.assign(dbReviewsMeta, results[0][0].q1);
-              Object.assign(dbReviewsMeta, results[1][0].meta)
+              Object.assign(dbReviewsMeta, results[1][0].meta);
               res.send(dbReviewsMeta);
             })
             .catch((err) => res.send(err))
@@ -152,12 +153,15 @@ const reviews = {
     })().catch((e) => console.error(e.stack));
   },
   put: (req, res) => {
+    // if (isNaN(req.params.review_id)) {
+    //   res.status(500).send('not a valid review_id');
+    // } else {
     if (req.url.includes('helpful')) {
       pool.connect()
         .then((client) => {
           client.query(`UPDATE reviews set helpfulness = helpfulness + 1 WHERE id = ${req.params.review_id}`)
             .then((response) => { res.status(202).send({ message: 'review was updated', response }); })
-            .catch((err) => { res.status(500).send({ message: 'review was not updated', err }); })
+            .catch(() => { res.status(500).send({ message: 'review was not updated' }); })
             .finally(() => {
               client.release();
             });
@@ -168,13 +172,14 @@ const reviews = {
       pool.connect()
         .then((client) => {
           client.query(`UPDATE reviews set reported = 't' WHERE id = ${req.params.review_id}`)
-            .then((response) => { res.status(202).send({ message: 'review was reported', response }); })
-            .catch((err) => { res.status(500).send({ message: 'review was not reported', err }); })
+          .then((response) => { res.status(202).send({ message: 'review was reported', response }); })
+          .catch(() => { res.status(500).send({ message: 'review was not reported' }); })
             .finally(() => {
               client.release();
             });
         });
     }
+    // }
   },
 };
 

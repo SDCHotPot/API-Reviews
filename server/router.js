@@ -11,7 +11,6 @@ router.post('/reviews', (req, res) => {
   controller.reviews.post(req, res);
 });
 router.put('/reviews/:review_id/helpful', (req, res) => {
-  console.log('put request is made?')
   controller.reviews.put(req, res);
 });
 router.put('/reviews/:review_id/report', (req, res) => {

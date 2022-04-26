@@ -1,6 +1,7 @@
 /* eslint-disable camelcase */
 /* eslint-disable no-undef */
 const axios = require('axios');
+const {client} = require('../dbms/postgres/postgres')
 
 const baseUrl = 'http://localhost:3000';
 
@@ -46,30 +47,65 @@ describe('contacting the API for reviews ', () => {
       .catch(() => {
       });
   });
+  it('should not send back reviews if not product_id is specified per parameters', () => {
+    axios.get(`${baseUrl}/reviews`, { params: { sort: 'newest' } })
+      .then(() => {})
+      .catch((err) => expect(err.response.data).toBe('no product id'))
+      .finally(() => {});
+  });
 });
 
-describe('marking that a review is helpful', () => {
-  let helpfulness;
-  const randomId = Math.ceil(Math.random() * 10000);
-  axios.get(`${baseUrl}/reviews/`, { params: { product_id: randomId } })
-    .then((results) => {
-      const reviewNumber = results.data.results[0].id;
-      helpfulness = results.data.results[0].helpfulness;
-      axios.put(`${baseUrl}/review/${reviewNumber}/helpful`)
-        .then(() => {
-          axios.get(`${baseUrl}/reviews/`, { params: { product_id: randomId } })
-            .then((results2) => {
-              expect(results2.data.results[0].helpfulness).toEqual(helpfulness + 1);
-            })
-            .catch((err) => {
-              console.log(err);
-            });
-        })
-        .catch((err) => {
-          console.log(err);
-        });
-    })
-    .catch((err) => {
-      console.log(err);
-    });
+describe('making put request to the API', () => {
+  it('should mark a review as helpful', () => {
+    let helpfulness;
+    const randomId = Math.ceil(Math.random() * 10000);
+    let review_id;
+    axios.get(`${baseUrl}/reviews`, { params: { product_id: randomId} })
+      .then((results) => {
+        helpfulness = results.data.results[0].helpfulness;
+        review_id = results.data.results[0].review_id;
+        axios.put(`${baseUrl}/reviews/${review_id}/helpful`)
+          .then(() => {
+            axios.get(`${baseUrl}/reviews`, { params: { product_id: randomId } })
+              .then((results2) => {
+                expect(results2.data.results[0].helpfulness).toEqual(helpfulness + 1);
+              })
+              .catch(() => {});
+          })
+          .catch(() => {});
+      })
+      .catch(() => {});
+  });
+
+  it('should mark a review as reported', async () => {
+    let review_id;
+    const randomId = Math.ceil(Math.random() * 10000);
+    axios.get(`${baseUrl}/reviews`, { params: { product_id: randomId} })
+      .then((results) => {
+        reported = results.data.results[0].reported;
+        review_id = results.data.results[0].review_id;
+        axios.put(`${baseUrl}/reviews/${review_id}/report`)
+          .then(() => {
+            client.query(`SELECT r.* FROM reviews r WHERE r.id = ${review_id};`)
+              .then((queryResults) => {
+                client.end();
+                expect(queryResults.rows[0].reported).toBeTruthy();
+              }).catch((err) => console.log(err));
+          }).catch((err) => console.log(err));
+      }).catch((err) => console.log(err));
+  });
+
+  it('should not make put request for an invalid review_id', () => {
+    const review_id = '123asd';
+    axios.put(`${baseUrl}/reviews/${review_id}/helpful`)
+      .then(() => {
+      })
+      .catch((err) => {
+        expect(err.response.data.message).toBe('review was not updated')
+      });
+  });
 });
+
+// describe('closing the client', () => {
+//   client.end();
+// });

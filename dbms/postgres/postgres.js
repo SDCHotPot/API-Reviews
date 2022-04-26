@@ -7,14 +7,14 @@ const pool = new Pool({
   password: `${process.env.PASSWORD}`,
   host: `${process.env.HOST}`,
   database: `${process.env.DATABASE}`,
-  max: 100,
+  port: `${process.env.PGPORT}`,
+  max: 200,
   connectionTimeoutMillis: 300,
   idleTimeoutMillis: 1000,
 
 });
 
 pool.on('connect', (() => {
-  console.log(`${pool.totalCount} users active`);
 }));
 const client = new Client({
   user: `${process.env.USER}`,
@@ -25,7 +25,6 @@ const client = new Client({
 
 client.connect()
   .then(() => {
-    console.log(`im connected to ${client.database}`);
   })
   .catch((err) => {
     console.log(err);
