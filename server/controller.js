@@ -2,7 +2,7 @@
 // const Photos = require('../dbms/postgres/Schemas/Photos');
 // const { URL } = require('url');
 
-const client = require('../dbms/postgres/postgres');
+const { pool, cl } = require('../dbms/postgres/postgres');
 
 const reviews = {
   get: (req, res) => {
@@ -27,66 +27,82 @@ const reviews = {
       const dbReviews = {
         product: Number(product_id), page, count, sort,
       };
-      const queryString = `SELECT r.*, COALESCE( json_agg(
+      const queryString = `SELECT r.*, COALESCE(json_agg(
                           json_build_object(
                               'id', p.id,
                               'url', p.url)) FILTER (WHERE p.id IS NOT NULL), '[]') AS photos
                           FROM reviews r LEFT OUTER JOIN photos p ON p.review_id = r.id
-                          WHERE r.product_id = ${product_id} GROUP BY r.id
+                          WHERE r.product_id = ${product_id} AND r.reported = NOT 't' GROUP BY r.id
                           ${orderBy}
                           LIMIT ${count} OFFSET ${(page - 1) * count};`;
-      client.query(queryString)
-        .then((Result) => { dbReviews.results = Result.rows; res.send(dbReviews); })
-        .catch((err) => { res.send(err); client.query('ROLLBACK'); });
+      pool.connect()
+        .then((client) => {
+          client.query(queryString)
+            .then((Result) => { dbReviews.results = Result.rows; res.send(dbReviews); })
+            .catch((err) => { res.send(err); pool.query('ROLLBACK'); })
+            .finally(() => {
+              client.release();
+            });
+        });
     }
   },
+
   meta: (req, res) => {
     const { product_id } = req.query;
-
-    const reviewMetaQueryString1 = `SELECT json_build_object(
-                                   'review_total', COUNT(*),
-                                   'recommended', json_build_object(
-                                                  'true', COUNT(*) FILTER (WHERE r.recommended = 't'),
-                                                  'false', COUNT(*) FILTER (WHERE r.recommended = 'f')),
-                                                  'product_id', r.product_id,
-                                                  'ratings' , json_build_object(
-                                                            '1', count(*) FILTER (WHERE r.rating = 1),
-                                                            '2', count(*) FILTER (WHERE r.rating = 2),
-                                                            '3', count(*) FILTER (WHERE r.rating = 3),
-                                                            '4', count(*) FILTER (WHERE r.rating = 4),
-                                                            '5', count(*) FILTER (WHERE r.rating = 5)))::jsonb AS q1
-                                    FROM reviews r WHERE r.product_id = ${product_id}
-                                    GROUP BY r.product_id;`;
-
-    const reviewMetaQueryString2 = `SELECT
-                                    json_build_object(
-                                    c.name, json_build_object(
-                                            'id', cr.characteristic_id,
-                                            'avg', avg(cr.value)))::jsonb as q2
-                                    FROM reviews r INNER JOIN characteristic_reviews cr on r.id = cr.review_id
-                                    INNER JOIN characteristics c on cr.characteristic_id = c.id WHERE r.product_id = ${product_id}
-                                    GROUP BY r.product_id, c.name, cr.characteristic_id;`;
-    const dbReviewsMeta = {
-      product_id: Number(product_id),
-    };
-
-    Promise.all(
-      [client.query(reviewMetaQueryString1)
-        .then((result) => result.rows)
-        .catch((err) => err),
-      client.query(reviewMetaQueryString2)
-        .then((result) => result.rows)
-        .catch((err) => err)],
-    )
-      .then((results) => {
-        Object.assign(dbReviewsMeta, results[0][0].q1);
-        dbReviewsMeta.characteristics = {};
-        results[1].forEach((result) => {
-          Object.assign(dbReviewsMeta.characteristics, result.q2);
+    if (!product_id) {
+      res.status(500).send('no product id');
+    } else {
+      const reviewMetaQueryString1 = `SELECT json_build_object(
+                                     'review_total', COUNT(*),
+                                     'recommended', json_build_object(
+                                                    'true', COUNT(*) FILTER (WHERE r.recommended = 't'),
+                                                    'false', COUNT(*) FILTER (WHERE r.recommended = 'f')),
+                                                    'product_id', r.product_id,
+                                                    'ratings' , json_build_object(
+                                                              '1', count(*) FILTER (WHERE r.rating = 1),
+                                                              '2', count(*) FILTER (WHERE r.rating = 2),
+                                                              '3', count(*) FILTER (WHERE r.rating = 3),
+                                                              '4', count(*) FILTER (WHERE r.rating = 4),
+                                                              '5', count(*) FILTER (WHERE r.rating = 5)))::jsonb AS q1
+                                      FROM reviews r WHERE r.product_id = ${product_id}
+                                      GROUP BY r.product_id;`;
+      const reviewMetaQueryString2 = `with characteristics_meta as(
+                                        select json_build_object(
+                                          'id', c.id,
+                                          'avgvalue', avg(cr.value)) as meta,
+                                          c.name as name from characteristic_reviews cr
+                                          inner join reviews r on r.id = cr.review_id
+                                          inner join characteristics c on c.id = cr.characteristic_id
+                                          where r.product_id = ${product_id} group by c.id)
+                                      select json_build_object(
+                                        'characteristics', json_object_agg(
+                                          cm.name, cm.meta)) as meta
+                                      from characteristics_meta cm;`;
+      const dbReviewsMeta = {
+        product_id: Number(product_id),
+      };
+      pool.connect()
+        .then((client) => {
+          Promise.all(
+            [client.query(reviewMetaQueryString1)
+              .then((result) => result.rows)
+              .catch((err) => err),
+            client.query(reviewMetaQueryString2)
+              .then((result) => result.rows)
+              .catch((err) => err),
+            ],
+          )
+            .then((results) => {
+              Object.assign(dbReviewsMeta, results[0][0].q1);
+              Object.assign(dbReviewsMeta, results[1][0].meta)
+              res.send(dbReviewsMeta);
+            })
+            .catch((err) => res.send(err))
+            .finally(() => {
+              client.release();
+            });
         });
-        res.send(dbReviewsMeta);
-      })
-      .catch((err) => res.send(err));
+    }
   },
   post: (req, res) => {
     const {
@@ -95,6 +111,7 @@ const reviews = {
     } = req.body;
     (async () => {
       try {
+        const client = await pool.connect();
         await client.query('BEGIN');
         const reviewInsertText = 'INSERT INTO reviews (product_id, rating, summary, body, recommended, reviewer_name, reviewer_email) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id;';
         const reviewInsertValues = [product_id, rating, summary, body, recommend, name, email];
@@ -110,10 +127,8 @@ const reviews = {
           }
           photoInsertValue.push(reviewResponse.rows[0].id, photos[index]);
         });
-        // console.log(photoInsertText, photoInsertValue);
 
-        // const photosResponse = await client.query(photoInsertText, photoInsertValue);
-        // console.log(photosResponse);
+        const photoResponse = await client.query(photoInsertText, photoInsertValue);
 
         let characteristicReviewsInsertText = 'INSERT INTO characteristic_reviews (characteristic_id, review_id, value) VALUES';
         const characteristicReviewsInsertValue = [];
@@ -124,31 +139,41 @@ const reviews = {
           } else {
             characteristicReviewsInsertText += ` ($${(index * 3) + 1}, $${(index * 3) + 2}, $${(index * 3) + 3});`;
           }
-          // console.log(charId, reviewResponse.rows[0].id, characteristics[charId]);
-          characteristicReviewsInsertValue.push(charId, reviewResponse.rows[0].id, characteristics[charId]);
+          characteristicReviewsInsertValue
+            .push(charId, reviewResponse.rows[0].id, characteristics[charId]);
         });
-        // console.log(characteristicReviewsInsertText, characteristicReviewsInsertValue);
-        const characteristicReviewResponse = (
-          await client.query(characteristicReviewsInsertText, characteristicReviewsInsertValue)
-        );
-
+        await client.query(characteristicReviewsInsertText, characteristicReviewsInsertValue);
         await client.query('COMMIT');
+        await client.release();
         res.send('im finally back');
       } catch (e) {
-        await client.query('ROLLBACK');
+        await pool.query('ROLLBACK');
       }
     })().catch((e) => console.error(e.stack));
   },
   put: (req, res) => {
     if (req.url.includes('helpful')) {
-      client.query(`UPDATE reviews set helpfulness = helpfulness + 1 WHERE id = ${req.params.review_id}`)
-        .then((response) => { res.status(202).send({ message: 'review was updated', response }); })
-        .catch((err) => { res.status(500).send({ message: 'review was not updated', err }); });
+      pool.connect()
+        .then((client) => {
+          client.query(`UPDATE reviews set helpfulness = helpfulness + 1 WHERE id = ${req.params.review_id}`)
+            .then((response) => { res.status(202).send({ message: 'review was updated', response }); })
+            .catch((err) => { res.status(500).send({ message: 'review was not updated', err }); })
+            .finally(() => {
+              client.release();
+            });
+        });
+      // console.log(pool.totalCount);
     }
     if (req.url.includes('report')) {
-      client.query(`UPDATE reviews set reported = 'f' WHERE id = ${req.params.review_id}`)
-        .then((response) => { res.status(202).send({ message: 'review was reported', response }); })
-        .catch((err) => { res.status(500).send({ message: 'review was not reported', err }); });
+      pool.connect()
+        .then((client) => {
+          client.query(`UPDATE reviews set reported = 't' WHERE id = ${req.params.review_id}`)
+            .then((response) => { res.status(202).send({ message: 'review was reported', response }); })
+            .catch((err) => { res.status(500).send({ message: 'review was not reported', err }); })
+            .finally(() => {
+              client.release();
+            });
+        });
     }
   },
 };

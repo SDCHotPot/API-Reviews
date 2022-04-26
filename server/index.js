@@ -1,7 +1,7 @@
 const express = require('express');
 require('../dbms/mongo/mongoose');
 require('../dbms/postgres/postgres');
-const bodyParser = require('body-parser')
+const bodyParser = require('body-parser');
 
 const router = require('./router');
 

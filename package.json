@@ -5,9 +5,10 @@
   "main": "index.js",
   "scripts": {
     "server": "nodemon server/index.js",
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "jest",
     "seed": "psql postgres -U rphpandan < dbms/postgres/seed.sql",
-    "testDb": "psql postgres -U rphpandan < dbms/postgres/testTables.sql"
+    "testDb": "psql postgres -U rphpandan < dbms/postgres/testTables.sql",
+    "k6Load": "k6 run k6Load/script.js"
   },
   "repository": {
     "type": "git",
@@ -21,8 +22,10 @@
   "homepage": "https://github.com/SDCHotPot/API-Reviews#readme",
   "dependencies": {
     "axios": "^0.26.1",
+    "body-parser": "^1.20.0",
     "dotenv": "^16.0.0",
     "express": "^4.17.3",
+    "express-validator": "^6.14.0",
     "mongoose": "^6.3.0",
     "nodemon": "^2.0.15",
     "pg": "^8.7.3",
@@ -35,6 +38,7 @@
     "eslint-plugin-import": "^2.26.0",
     "eslint-plugin-jsx-a11y": "^6.5.1",
     "eslint-plugin-react": "^7.29.4",
-    "eslint-plugin-react-hooks": "^4.4.0"
+    "eslint-plugin-react-hooks": "^4.4.0",
+    "jest": "^28.0.0"
   }
 }
