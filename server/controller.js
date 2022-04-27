@@ -46,7 +46,7 @@ const reviews = {
         .finally(() => {
           // client.release();
         });
-        // });
+      // });
     }
   },
   meta: (req, res) => {
@@ -129,7 +129,7 @@ const reviews = {
           photoInsertValue.push(reviewResponse.rows[0].id, photos[index]);
         });
 
-        const photoResponse = await client.query(photoInsertText, photoInsertValue);
+        await client.query(photoInsertText, photoInsertValue);
 
         let characteristicReviewsInsertText = 'INSERT INTO characteristic_reviews (characteristic_id, review_id, value) VALUES';
         const characteristicReviewsInsertValue = [];
@@ -150,7 +150,7 @@ const reviews = {
       } catch (e) {
         await pool.query('ROLLBACK');
       }
-    })().catch((e) => console.error(e.stack));
+    })().catch((e) => res.send(e.stack));
   },
   put: (req, res) => {
     if (req.url.includes('helpful')) {
