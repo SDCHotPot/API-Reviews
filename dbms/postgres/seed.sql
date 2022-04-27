@@ -33,7 +33,7 @@ CREATE TABLE IF NOT EXISTS reviews (
 );
 ALTER TABLE reviews ADD FOREIGN KEY (product_id) REFERENCES products (id);
 \COPY reviews FROM 'dbms/csv/reviews.csv' delimiter ',' csv header;
-CREATE INDEX review_product_id ON reviews(product_id);
+CREATE INDEX review_product_id ON reviews USING HASH (product_id);
 SELECT setval('reviews_id_seq', (SELECT MAX(id) FROM reviews)+1);
 
 UPDATE reviews SET date=date/1000;
@@ -47,7 +47,7 @@ CREATE TABLE IF NOT EXISTS characteristics (
 );
 ALTER TABLE characteristics ADD FOREIGN KEY (product_id) REFERENCES products (id);
 \COPY characteristics FROM 'dbms/csv/characteristics.csv' delimiter ',' csv header;
-CREATE INDEX characteristics_product_id ON characteristics(product_id);
+CREATE INDEX characteristics_product_id ON characteristics USING HASH (product_id);
 SELECT setval('characteristics_id_seq', (SELECT MAX(id) FROM characteristics)+1);
 
 
@@ -58,7 +58,7 @@ CREATE TABLE IF NOT EXISTS photos (
 );
 ALTER TABLE photos ADD FOREIGN KEY (review_id) REFERENCES reviews (id);
 \COPY photos FROM 'dbms/csv/reviews_photos.csv' delimiter ',' csv header;
-CREATE INDEX photos_review_id ON photos(review_id);
+CREATE INDEX photos_review_id ON photos USING HASH (review_id);
 SELECT setval('photos_id_seq', (SELECT MAX(id) FROM photos)+1);
 
 
@@ -71,6 +71,6 @@ CREATE TABLE IF NOT EXISTS characteristic_reviews (
 ALTER TABLE characteristic_reviews ADD FOREIGN KEY (characteristic_id) REFERENCES characteristics (id);
 ALTER TABLE characteristic_reviews ADD FOREIGN KEY (review_id) REFERENCES reviews (id);
 \COPY characteristic_reviews FROM 'dbms/csv/characteristic_reviews.csv' delimiter ',' csv header;
-CREATE INDEX characteristic_reviews_characteristic_id ON characteristic_reviews(characteristic_id);
-CREATE INDEX characteristic_reviews_review_id ON characteristic_reviews(review_id);
+CREATE INDEX characteristic_reviews_characteristic_id ON characteristic_reviews USING HASH (characteristic_id);
+CREATE INDEX characteristic_reviews_review_id ON characteristic_reviews USING HASH (review_id);
 SELECT setval('characteristic_reviews_id_seq', (SELECT MAX(id) FROM characteristic_reviews)+1);

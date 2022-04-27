@@ -16,4 +16,9 @@ router.put('/reviews/:review_id/helpful', (req, res) => {
 router.put('/reviews/:review_id/report', (req, res) => {
   controller.reviews.put(req, res);
 });
+
+router.get('/test', (req, res) => {
+  console.log('im getting hit');
+  res.send('hello World!');
+});
 module.exports = router;
