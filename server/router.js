@@ -1,4 +1,5 @@
 const router = require('express').Router();
+const path = require('path');
 const controller = require('./controller');
 
 router.get('/reviews', (req, res) => {
@@ -23,7 +24,6 @@ router.get('/test', (req, res) => {
 });
 
 router.get('/loaderio-9d9f7f71dfa6d3e77c5bbc7dc0c40f31/', (req, res) => {
-  console.log('token is being acquired');
-  res.send('loaderio-9d9f7f71dfa6d3e77c5bbc7dc0c40f31');
+  res.sendFile(path.join(`/${__dirname}/../loaderio-9d9f7f71dfa6d3e77c5bbc7dc0c40f31.txt`));
 });
 module.exports = router;
