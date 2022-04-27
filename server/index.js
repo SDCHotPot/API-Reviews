@@ -1,5 +1,7 @@
 const express = require('express');
 require('dotenv').config();
+require('dotenv/config');
+
 require('../dbms/mongo/mongoose');
 require('../dbms/postgres/postgres');
 const bodyParser = require('body-parser');

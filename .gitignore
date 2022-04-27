@@ -107,6 +107,15 @@ dist
 
 #
 package-lock.json
-
-#
 dbms/csv/
+
+
+scp -i "SDC Products API.pem"
+dbms/data/styles.csv
+ubuntu@ec2-3-101-63-164.us-west-1.compute.amazonaws.com:~/dbms/data/
+
+scp -i 'sdcapi.pem'
+../csv/product.csv
+ubuntu@ec2-54-219-229-86.us-west-1.compute.amazonaws.com:~/seed
+
+psql postgres -U ubuntu < seed/awsSeed.sql
