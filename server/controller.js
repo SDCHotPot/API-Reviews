@@ -2,7 +2,7 @@
 // const Photos = require('../dbms/postgres/Schemas/Photos');
 // const { URL } = require('url');
 
-const { pool, cl } = require('../dbms/postgres/postgres');
+const { pool } = require('../dbms/postgres/postgres');
 
 const reviews = {
   get: (req, res) => {
@@ -38,15 +38,15 @@ const reviews = {
                           WHERE r.product_id = ${product_id} AND r.reported = NOT 't' GROUP BY r.id
                           ${orderBy}
                           LIMIT ${count} OFFSET ${(page - 1) * count};`;
-      pool.connect()
-        .then((client) => {
-          client.query(queryString)
-            .then((Result) => { dbReviews.results = Result.rows; res.send(dbReviews); })
-            .catch((err) => { res.send(err); pool.query('ROLLBACK'); })
-            .finally(() => {
-              client.release();
-            });
+      // pool.connect()
+      //   .then((client) => {
+      pool.query(queryString)
+        .then((Result) => { dbReviews.results = Result.rows; res.send(dbReviews); })
+        .catch((err) => { res.send(err); pool.query('ROLLBACK'); })
+        .finally(() => {
+          // client.release();
         });
+      // });
     }
   },
   meta: (req, res) => {
@@ -82,27 +82,27 @@ const reviews = {
       const dbReviewsMeta = {
         product_id: Number(product_id),
       };
-      pool.connect()
-        .then((client) => {
-          Promise.all(
-            [client.query(reviewMetaQueryString1)
-              .then((result) => result.rows)
-              .catch((err) => err),
-            client.query(reviewMetaQueryString2)
-              .then((result) => result.rows)
-              .catch((err) => err),
-            ],
-          )
-            .then((results) => {
-              Object.assign(dbReviewsMeta, results[0][0].q1);
-              Object.assign(dbReviewsMeta, results[1][0].meta);
-              res.send(dbReviewsMeta);
-            })
-            .catch((err) => res.send(err))
-            .finally(() => {
-              client.release();
-            });
+      // pool.connect()
+      //   .then((client) => {
+      Promise.all(
+        [pool.query(reviewMetaQueryString1)
+          .then((result) => result.rows)
+          .catch((err) => err),
+        pool.query(reviewMetaQueryString2)
+          .then((result) => result.rows)
+          .catch((err) => err),
+        ],
+      )
+        .then((results) => {
+          Object.assign(dbReviewsMeta, results[0][0].q1);
+          Object.assign(dbReviewsMeta, results[1][0].meta);
+          res.send(dbReviewsMeta);
+        })
+        .catch((err) => res.send(err))
+        .finally(() => {
+          // client.release();
         });
+      // });
     }
   },
   post: (req, res) => {
@@ -129,7 +129,7 @@ const reviews = {
           photoInsertValue.push(reviewResponse.rows[0].id, photos[index]);
         });
 
-        const photoResponse = await client.query(photoInsertText, photoInsertValue);
+        await client.query(photoInsertText, photoInsertValue);
 
         let characteristicReviewsInsertText = 'INSERT INTO characteristic_reviews (characteristic_id, review_id, value) VALUES';
         const characteristicReviewsInsertValue = [];
@@ -150,36 +150,31 @@ const reviews = {
       } catch (e) {
         await pool.query('ROLLBACK');
       }
-    })().catch((e) => console.error(e.stack));
+    })().catch((e) => res.send(e.stack));
   },
   put: (req, res) => {
-    // if (isNaN(req.params.review_id)) {
-    //   res.status(500).send('not a valid review_id');
-    // } else {
     if (req.url.includes('helpful')) {
-      pool.connect()
-        .then((client) => {
-          client.query(`UPDATE reviews set helpfulness = helpfulness + 1 WHERE id = ${req.params.review_id}`)
-            .then((response) => { res.status(202).send({ message: 'review was updated', response }); })
-            .catch(() => { res.status(500).send({ message: 'review was not updated' }); })
-            .finally(() => {
-              client.release();
-            });
+      // pool.connect()
+      //   .then((client) => {
+      pool.query(`UPDATE reviews set helpfulness = helpfulness + 1 WHERE id = ${req.params.review_id}`)
+        .then((response) => { res.status(202).send({ message: 'review was updated', response }); })
+        .catch(() => { res.status(500).send({ message: 'review was not updated' }); })
+        .finally(() => {
+          // client.release();
         });
-      // console.log(pool.totalCount);
+    // });
     }
     if (req.url.includes('report')) {
-      pool.connect()
-        .then((client) => {
-          client.query(`UPDATE reviews set reported = 't' WHERE id = ${req.params.review_id}`)
-          .then((response) => { res.status(202).send({ message: 'review was reported', response }); })
-          .catch(() => { res.status(500).send({ message: 'review was not reported' }); })
-            .finally(() => {
-              client.release();
-            });
+      // pool.connect()
+      //   .then((client) => {
+      pool.query(`UPDATE reviews set reported = 't' WHERE id = ${req.params.review_id}`)
+        .then((response) => { res.status(202).send({ message: 'review was reported', response }); })
+        .catch(() => { res.status(500).send({ message: 'review was not reported' }); })
+        .finally(() => {
+          // client.release();
         });
+      // });
     }
-    // }
   },
 };
 

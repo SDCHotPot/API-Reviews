@@ -21,4 +21,8 @@ router.get('/test', (req, res) => {
   console.log('im getting hit');
   res.send('hello World!');
 });
+
+router.get('/loaderio-9d9f7f71dfa6d3e77c5bbc7dc0c40f31', (req, res) => {
+  res.send('loaderio-9d9f7f71dfa6d3e77c5bbc7dc0c40f31');
+});
 module.exports = router;

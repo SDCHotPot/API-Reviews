@@ -1,9 +1,10 @@
 /* eslint-disable camelcase */
 /* eslint-disable no-undef */
 const axios = require('axios');
-const {client} = require('../dbms/postgres/postgres')
+const { client } = require('../dbms/postgres/postgres')
 
 const baseUrl = 'http://localhost:3000';
+
 
 describe('contacting the API for reviews ', () => {
   const params = {
