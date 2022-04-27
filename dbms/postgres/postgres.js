@@ -41,17 +41,16 @@ const pool = new Pool({
 //   });
 pool.connect();
 
-// pool.on('connect', (() => {
-//   console.log(`pool is connected to ${process.env.PGDATABASE} as ${process.env.PGUSER}`);
-//   console.log(`${pool.totalCount} total user in the pool`);
-// }));
-
+pool.on('connect', (() => {
+  console.log(`pool is connected to ${process.env.PGDATABASE} as ${process.env.PGUSER}`);
+  console.log(`${pool.totalCount} total user in the pool`);
+}));
 
 pool.on('remove', (() => {
   console.log(`user is leaving the pool ${pool.totalCount} users left `);
 }));
 
 pool.on('acquire', (() => {
-  console.log(`${pool.totalCount} users`)
-}))
+  console.log(`${pool.totalCount} users acquired`);
+}));
 module.exports = { pool };
