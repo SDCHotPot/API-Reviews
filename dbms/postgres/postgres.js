@@ -48,4 +48,9 @@ pool.on('remove', (() => {
 
 pool.on('acquire', (() => {
 }));
+
+setInterval(() => {
+  console.log(`${pool.totalCount} total users connected`);
+}, 10000);
+
 module.exports = { pool };
