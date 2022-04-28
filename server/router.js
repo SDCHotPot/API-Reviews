@@ -23,7 +23,7 @@ router.get('/test', (req, res) => {
   res.send('hello World!');
 });
 
-router.get('/loaderio-3d1e18fab61cc9dc92aaa33eb596206f', (req, res) => {
-  res.sendFile(path.join(`/${__dirname}/../loaderio-3d1e18fab61cc9dc92aaa33eb596206f.txt`));
-});
+// router.get('/loaderio-3d1e18fab61cc9dc92aaa33eb596206f', (req, res) => {
+//   res.sendFile(path.join(`/${__dirname}/../loaderio-3d1e18fab61cc9dc92aaa33eb596206f.txt`));
+// });
 module.exports = router;
