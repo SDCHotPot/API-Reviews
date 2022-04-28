@@ -8,7 +8,7 @@ const pool = new Pool({
   password: `${process.env.PGPASSWORD}`,
   host: `${process.env.PGHOST}`,
   database: `${process.env.PGDATABASE}`,
-  max: 100,
+  max: `${process.env.PGMAX}`,
   // idleTimeoutMillis: 100,
 
 });
