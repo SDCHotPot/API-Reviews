@@ -7,6 +7,7 @@ const { pool } = require('../dbms/postgres/postgres');
 const reviews = {
   get: (req, res) => {
     const { product_id } = req.query;
+    console.log(`get reviews for ${product_id}`);
     if (!product_id) {
       res.status(500).send('no product id');
     } else {
