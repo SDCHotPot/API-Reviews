@@ -3,9 +3,9 @@
 ## Authors
 Pascal Bui -
 
-|## Contact Me|
+|Contact Me|
 |-------------|
-|<img src="https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white"/> - https://www.linkedin.com/in/pascal-bui-b44ab955|
+|<img src="https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white" href="https://www.linkedin.com/in/pascal-bui-b44ab955" /> - https://www.linkedin.com/in/pascal-bui-b44ab955|
 |<img src="https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white"/> - https://github.com/RphPandan|
 
 
