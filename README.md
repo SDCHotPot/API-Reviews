@@ -2,16 +2,16 @@
 
 ## Authors
 Pascal Bui - https://github.com/RphPandan
-| <img src="https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white" href='https://wwwlinkedin.com/in/pascal-bui-b44ab955'/>
+<img src="https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white"/> - https://wwwlinkedin.com/in/pascal-bui-b44ab955
 
 
 
 ## Stack
-| <img src="https://img.shields.io/badge/Express%20js-000000?style=for-the-badge&logo=express&logoColor=white"/> |<img src="https://img.shields.io/badge/node.js-6DA55F?style=for-the-badge&logo=node.js&logoColor=white"/> |<img src="https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white" /> | <img src="https://img.shields.io/badge/Amazon_AWS-FF9900?style=for-the-badge&logo=amazonaws&logoColor=white"/>
+<img src="https://img.shields.io/badge/Express%20js-000000?style=for-the-badge&logo=express&logoColor=white"/> <img src="https://img.shields.io/badge/node.js-6DA55F?style=for-the-badge&logo=node.js&logoColor=white"/> <img src="https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white" /> <img src="https://img.shields.io/badge/Amazon_AWS-FF9900?style=for-the-badge&logo=amazonaws&logoColor=white"/>
 
 ## Overview
 
-This Systems-Design Capstone project was developed during the senior phase of the Hack Reactor Software Engineering Immersive (RFP2202). Our group was tasked to implement a REST API service for an e-commerce application. This particular API service was developed for the '/reviews' endpoints specifically.
+This Systems Design Capstone project was developed during the senior phase of the Hack Reactor Software Engineering Immersive (RFP2202). Our group was tasked to implement a REST API service for an e-commerce application. This particular API service was developed for the '/reviews' endpoints specifically.
 
 
 ## Install
@@ -44,7 +44,7 @@ The API endpoints for this service are as follows:
 | POST   | '/reviews'       |
 | PUT    | '/reviews/:review_id'/ (helpful OR reported)  |
 
-### 'GET /reviews/'
+### GET /reviews/
 Will return a list of reviews for specified product.
 #### Parameters
 | Parameter | Type    | Description                                                |
@@ -93,7 +93,7 @@ status - 200
 }
 ```
 
-### 'GET /reviews/meta'
+### GET /reviews/meta
 Will return aggregate meta data for a specified product.
 
 #### Parameters
@@ -138,7 +138,7 @@ status - 200
 }
 ```
 
-### 'POST /reviews/meta'
+### POST /reviews/meta
 Will post a review for specified product into the database.
 
 #### Body Parameters
@@ -155,11 +155,30 @@ Will post a review for specified product into the database.
 | photos          | Array   | Array of text urls that link to images to be shown.        |
 | characteristcs  | Object  | Object of keys representing characteristic_id and values representing the review value for that characteristic. { "14": 5, "15": 5 //...}|
 
+#### Example Body
+```json
+{
+    "product_id": 4123,
+    "rating": 4,
+    "summary": "product was alright",
+    "body": "there were some scratchy bits but quality was ok",
+    "recommend": true,
+    "name": "Bob Bloblaw",
+    "email": "BobLaw@gmail.com",
+    "photos": ["https://images.unsplash.com/photo-1533779183510-8f55a55f15c1?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=668&q=80"],
+    "characteristics": {"13801": 2,
+                        "13798": 3,
+                        "13799": 4,
+                        "13800": 5
+                                    }
+}
+```
+
 #### Response
 Status: 201 - review for product ${product_id} CREATED
 
 
-### 'PUT /reviews/:review_id/ (either helpful OR report)'
+### PUT /reviews/:review_id/ (either helpful OR report)
 Updates a review to show it was found to be helpful or to be reported. Note, reporting a review does not delete it but the review will not be returned in the above GET request.
 
 #### Route Parameters
