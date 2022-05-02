@@ -7,7 +7,7 @@ Pascal Bui - https://github.com/RphPandan
 
 
 ## Stack
-| <img src="https://img.shields.io/badge/Express%20js-000000?style=for-the-badge&logo=express&logoColor=white"/> | <img src="https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white" /> | <img src="https://img.shields.io/badge/Amazon_AWS-FF9900?style=for-the-badge&logo=amazonaws&logoColor=white"/>
+| <img src="https://img.shields.io/badge/Express%20js-000000?style=for-the-badge&logo=express&logoColor=white"/> |<img src="https://img.shields.io/badge/node.js-6DA55F?style=for-the-badge&logo=node.js&logoColor=white"/> |<img src="https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white" /> | <img src="https://img.shields.io/badge/Amazon_AWS-FF9900?style=for-the-badge&logo=amazonaws&logoColor=white"/>
 
 ## Overview
 
@@ -16,14 +16,15 @@ This Systems-Design Capstone project was developed during the senior phase of th
 
 ## Install
 
-  ```
-  npm install
-  ```
+```
+npm install
+```
+change example.env to .env and configure variables.
 
 ## Run the App
 
 ```
-npm start
+npm run server
 ```
 
 ## Run the Tests
