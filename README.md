@@ -51,6 +51,7 @@ Will return a list of reviews for specified product.
 | [sort]    | String  | Will return reviews sorted by 'newest'/'helpful'/'relevant'|
 
 #### Response
+status - 200
 ```json
 {
     "product": 1,
@@ -96,6 +97,8 @@ Will return aggregate meta data for a specified product.
 |-----------|---------|--------------------------------------------------------------|
 | product_id| Integer | Required - Specifies which product to return meta data for   |
 
+#### Response
+status - 200
 ```json
 {
     "product_id": 1,
@@ -131,3 +134,22 @@ Will return aggregate meta data for a specified product.
 }
 ```
 
+### 'POST /reviews/meta'
+Will post a review for specified product into the database.
+
+#### Body Parameters
+
+| Parameter       | Type    | Description                                                |
+|-----------------|---------|------------------------------------------------------------|
+| product_id      | Integer | Required ID of the product to post the review for.         |
+| rating          | Integer | Integer (1-5) indicating the review rating.                |
+| summary         | String  | Summary text of the review.                                |
+| body            | String  | Continued or full text of the review.                      |
+| recommend       | Boolean | Value indicating if the reviewer recommends the product.   |
+| name            | String  | Username for question asker.                               |
+| email           | String  | Email address for question asker.                          |
+| photos          | Array   | Array of text urls that link to images to be shown.        |
+| characteristcs  | Object  | Object of keys representing characteristic_id and values representing the review value for that characteristic. { "14": 5, "15": 5 //...}|
+
+#### Response
+Status: 201 - review for product ${product_id} CREATED

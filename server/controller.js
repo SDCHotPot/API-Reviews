@@ -137,7 +137,7 @@ const reviews = {
         await client.query(characteristicReviewsInsertText, characteristicReviewsInsertValue);
         await client.query('COMMIT');
         await client.release();
-        res.send('im finally back');
+        res.status(201).send(`review for product ${product_id} CREATED`);
       } catch (e) {
         await pool.query('ROLLBACK');
       }
