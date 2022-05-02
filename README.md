@@ -35,6 +35,14 @@ npm test
 ## Description/API EndPoint
 
 The API endpoints for this service are as follows:
+
+| Method | Path    |
+|--------|---------|
+| GET    | '/reviews'  |
+| GET    | '/reviews/meta'  |
+| POST   | '/reviews'  |
+| PUT    | '/reviews/:review_id'/(helpful OR reported)  |
+
   * GET request - '/reviews'
   * GET request - '/reviews/meta'
   * POST request - '/reviews'
