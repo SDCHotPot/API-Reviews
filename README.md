@@ -191,7 +191,7 @@ Will post a review for specified product into the database.
 ```
 
 #### Response
-Status: 201 - review for product ${product_id} CREATED
+Status: 201 - review for product (product_id#) CREATED
 
 
 ### PUT /reviews/:review_id/ (either helpful OR report)
