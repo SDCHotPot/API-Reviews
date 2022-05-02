@@ -6,8 +6,8 @@
   "scripts": {
     "server": "nodemon server/index.js",
     "test": "jest",
-    "seed": "psql postgres -U rphpandan < dbms/postgres/seed.sql",
-    "testDb": "psql postgres -U rphpandan < dbms/postgres/testTables.sql",
+    "seed": "psql postgres < dbms/postgres/seed.sql",
+    "testDb": "psql postgres < dbms/postgres/testTables.sql",
     "k6Load": "k6 run test/k6Load/script.js"
   },
   "repository": {

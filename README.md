@@ -2,7 +2,10 @@
 
 ## Authors
 Pascal Bui - https://github.com/RphPandan
-<img src="https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white"/> - https://wwwlinkedin.com/in/pascal-bui-b44ab955
+
+## Contact Me
+<img src="https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white"/> - https://www.linkedin.com/in/pascal-bui-b44ab955
+<img src="	https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white"/> - https://github.com/RphPandan
 
 
 
@@ -20,6 +23,15 @@ This Systems Design Capstone project was developed during the senior phase of th
 npm install
 ```
 change example.env to .env and configure variables.
+
+## Postgres set up
+
+Schema file can be found in dbms/postgres/seed.sql and run with the following command
+
+```
+npm run seed
+```
+Note that csv files are not provided, seed.sql will still create the database/tables/foreign keys etc... as well as index each table additionally by the foreign key.
 
 ## Run the App
 
