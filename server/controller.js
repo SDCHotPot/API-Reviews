@@ -101,59 +101,59 @@ const reviews = {
       product_id, rating, summary, body,
       recommend, name, email, photos, characteristics,
     } = req.body;
-    (async () => {
-      try {
-        const client = await pool.connect();
-        await client.query('BEGIN');
-        const reviewInsertText = 'INSERT INTO reviews (product_id, rating, summary, body, recommended, reviewer_name, reviewer_email) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id;';
-        const reviewInsertValues = [product_id, rating, summary, body, recommend, name, email];
-        const reviewResponse = await client.query(reviewInsertText, reviewInsertValues);
-
-        let photoInsertText = 'INSERT INTO photos(review_id, url) VALUES ';
-        const photoInsertValue = [];
-        photos.forEach((photo, index) => {
-          if (index !== photos.length - 1) {
-            photoInsertText += ` ($${(index * 2) + 1}, $${(index * 2) + 2}),`;
-          } else {
-            photoInsertText += ` ($${(index * 2) + 1}, $${((index * 2) + 2)});`;
-          }
-          photoInsertValue.push(reviewResponse.rows[0].id, photos[index]);
-        });
-
-        await client.query(photoInsertText, photoInsertValue);
-
-        let characteristicReviewsInsertText = 'INSERT INTO characteristic_reviews (characteristic_id, review_id, value) VALUES';
-        const characteristicReviewsInsertValue = [];
-
-        Object.keys(characteristics).forEach((charId, index, chars) => {
-          if (index !== chars.length - 1) {
-            characteristicReviewsInsertText += ` ($${(index * 3) + 1}, $${(index * 3) + 2}, $${(index * 3) + 3}),`;
-          } else {
-            characteristicReviewsInsertText += ` ($${(index * 3) + 1}, $${(index * 3) + 2}, $${(index * 3) + 3});`;
-          }
-          characteristicReviewsInsertValue
-            .push(charId, reviewResponse.rows[0].id, characteristics[charId]);
-        });
-        await client.query(characteristicReviewsInsertText, characteristicReviewsInsertValue);
-        await client.query('COMMIT');
-        await client.release();
-        res.status(201).send(`review for product ${product_id} CREATED`);
-      } catch (e) {
-        await pool.query('ROLLBACK');
-      }
-    })().catch((e) => res.send(e.stack));
+    if (!Object.keys(req.body).every((parameter) => req.body[parameter])) {
+      res.status(500).send('One or more required fields is missing');
+    } else {
+      (async () => {
+        try {
+          const client = await pool.connect();
+          await client.query('BEGIN');
+          const reviewInsertText = 'INSERT INTO reviews (product_id, rating, summary, body, recommended, reviewer_name, reviewer_email) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id;';
+          const reviewInsertValues = [product_id, rating, summary, body, recommend, name, email];
+          const reviewResponse = await client.query(reviewInsertText, reviewInsertValues);
+          let photoInsertText = 'INSERT INTO photos(review_id, url) VALUES ';
+          const photoInsertValue = [];
+          photos.forEach((photo, index) => {
+            if (index !== photos.length - 1) {
+              photoInsertText += ` ($${(index * 2) + 1}, $${(index * 2) + 2}),`;
+            } else {
+              photoInsertText += ` ($${(index * 2) + 1}, $${((index * 2) + 2)});`;
+            }
+            photoInsertValue.push(reviewResponse.rows[0].id, photos[index]);
+          });
+          await client.query(photoInsertText, photoInsertValue);
+          let characteristicReviewsInsertText = 'INSERT INTO characteristic_reviews (characteristic_id, review_id, value) VALUES';
+          const characteristicReviewsInsertValue = [];
+          Object.keys(characteristics).forEach((charId, index, chars) => {
+            if (index !== chars.length - 1) {
+              characteristicReviewsInsertText += ` ($${(index * 3) + 1}, $${(index * 3) + 2}, $${(index * 3) + 3}),`;
+            } else {
+              characteristicReviewsInsertText += ` ($${(index * 3) + 1}, $${(index * 3) + 2}, $${(index * 3) + 3});`;
+            }
+            characteristicReviewsInsertValue
+              .push(charId, reviewResponse.rows[0].id, characteristics[charId]);
+          });
+          await client.query(characteristicReviewsInsertText, characteristicReviewsInsertValue);
+          await client.query('COMMIT');
+          await client.release();
+          res.status(201).send(`review for product ${product_id} CREATED`);
+        } catch (e) {
+          await pool.query('ROLLBACK');
+        }
+      })().catch((e) => res.send(e.stack));
+    }
   },
   put: (req, res) => {
     if (req.url.includes('helpful')) {
       pool.query(`UPDATE reviews set helpfulness = helpfulness + 1 WHERE id = ${req.params.review_id}`)
-        .then((response) => { res.status(202).send({ message: 'review was updated', response }); })
+        .then(() => { res.status(204).send(); })
         .catch(() => { res.status(500).send({ message: 'review was not updated' }); })
         .finally(() => {
         });
     }
     if (req.url.includes('report')) {
       pool.query(`UPDATE reviews set reported = 't' WHERE id = ${req.params.review_id}`)
-        .then((response) => { res.status(202).send({ message: 'review was reported', response }); })
+        .then(() => { res.status(204).send(); })
         .catch(() => { res.status(500).send({ message: 'review was not reported' }); })
         .finally(() => {
         });

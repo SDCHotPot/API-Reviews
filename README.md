@@ -38,15 +38,10 @@ The API endpoints for this service are as follows:
 
 | Method | Path    |
 |--------|---------|
-| GET    | '/reviews'  |
+| GET    | '/reviews'       |
 | GET    | '/reviews/meta'  |
-| POST   | '/reviews'  |
-| PUT    | '/reviews/:review_id'/(helpful OR reported)  |
-
-  * GET request - '/reviews'
-  * GET request - '/reviews/meta'
-  * POST request - '/reviews'
-  * PUT request - '/reviews/:review_id'/helpful || reported
+| POST   | '/reviews'       |
+| PUT    | '/reviews/:review_id'/ (helpful OR reported)  |
 
 ### 'GET /reviews/'
 Will return a list of reviews for specified product.
@@ -161,3 +156,16 @@ Will post a review for specified product into the database.
 
 #### Response
 Status: 201 - review for product ${product_id} CREATED
+
+
+### 'PUT /reviews/:review_id/ (either helpful OR report)'
+Updates a review to show it was found to be helpful or to be reported. Note, reporting a review does not delete it but the review will not be returned in the above GET request.
+
+#### Route Parameters
+
+| Parameter   | Type    | Description                           |
+|-------------|---------|---------------------------------------|
+| review_id   | Integer | Required ID of the review to update   |
+
+#### Response
+Status: 204 - No Content.
