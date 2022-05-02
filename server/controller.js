@@ -1,7 +1,4 @@
 /* eslint-disable camelcase */
-// const Photos = require('../dbms/postgres/Schemas/Photos');
-// const { URL } = require('url');
-
 const { pool } = require('../dbms/postgres/postgres');
 
 const reviews = {
@@ -39,15 +36,12 @@ const reviews = {
                           WHERE r.product_id = ${product_id} AND r.reported = NOT 't' GROUP BY r.id
                           ${orderBy}
                           LIMIT ${count} OFFSET ${(page - 1) * count};`;
-      // pool.connect()
-      //   .then((client) => {
+
       pool.query(queryString)
         .then((Result) => { dbReviews.results = Result.rows; res.send(dbReviews); })
         .catch((err) => { res.send(err); pool.query('ROLLBACK'); })
         .finally(() => {
-          // client.release();
         });
-      // });
     }
   },
   meta: (req, res) => {
@@ -83,8 +77,6 @@ const reviews = {
       const dbReviewsMeta = {
         product_id: Number(product_id),
       };
-      // pool.connect()
-      //   .then((client) => {
       Promise.all(
         [pool.query(reviewMetaQueryString1)
           .then((result) => result.rows)
@@ -101,9 +93,7 @@ const reviews = {
         })
         .catch((err) => res.send(err))
         .finally(() => {
-          // client.release();
         });
-      // });
     }
   },
   post: (req, res) => {
@@ -155,26 +145,18 @@ const reviews = {
   },
   put: (req, res) => {
     if (req.url.includes('helpful')) {
-      // pool.connect()
-      //   .then((client) => {
       pool.query(`UPDATE reviews set helpfulness = helpfulness + 1 WHERE id = ${req.params.review_id}`)
         .then((response) => { res.status(202).send({ message: 'review was updated', response }); })
         .catch(() => { res.status(500).send({ message: 'review was not updated' }); })
         .finally(() => {
-          // client.release();
         });
-    // });
     }
     if (req.url.includes('report')) {
-      // pool.connect()
-      //   .then((client) => {
       pool.query(`UPDATE reviews set reported = 't' WHERE id = ${req.params.review_id}`)
         .then((response) => { res.status(202).send({ message: 'review was reported', response }); })
         .catch(() => { res.status(500).send({ message: 'review was not reported' }); })
         .finally(() => {
-          // client.release();
         });
-      // });
     }
   },
 };
